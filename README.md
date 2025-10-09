@@ -2,7 +2,8 @@
 
 # Towson Terminators Codebase
  - C++ robotics code that was created by the Towson High School Robotics Organization from the years 2021-Present.
- - A Python GUI application for attendance logging. 
+ - A Python GUI application for attendance logging.
+ - A Python GUI application for scouting.
 
 ## Usage 
 This codebase has been licensed with an MIT license to allow and promote free and open access to code that is necessary or useful for VEX VRC teams. 

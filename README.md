@@ -15,7 +15,8 @@ As per the MIT License, all/any part(s) of this codebase may be forked and modif
 #### ATTENTION VEX VRC COMPETITIVE TEAMS - Even though this code is licensed with the MIT license, the RECF Code of Conduct and VEX Game Manual rules, particularly, G4 (The Robot must represent the skill level of the team) and R2 (Robots must represent the Team's skill level) may prohibit direct copy/paste of code in this repository for competitive use. Teams are encouraged to use this repository as guidance but are reminded to fully understand and be able to explain all code to event staff at request. Towson Robotics DOES NOT condone actions that violate either the letter or spirit of the RECF Code of Conduct and/or given VEX Game Manual. 
 
 ## Directory Structure
- - The "Attendance_Tracker" folder contains a standalone Python application that is used to track attendance for meetings. More details can be found in the "AttendanceTracker_README.md" file in the folder. 
+ - The "Attendance_Tracker" folder contains a standalone Python application that is used to track attendance for meetings. More details can be found in the "AttendanceTracker_README.md" file in the folder.
+ - The "Python App" folder contains a standalone Python application that is a scouting application for VEX teams. Unfinished.
  - The "Competitive_Code" folder contains all code actually used at VEX VRC competitions by the Towson Terminators, sorted by season.
  - The "Non-Competitve_Code" folder contains all code that was either never intended for or ultimately never used in actual competitions, sorted by season. 
  - All C++ header (.h) files can be found in any folders titled "include"

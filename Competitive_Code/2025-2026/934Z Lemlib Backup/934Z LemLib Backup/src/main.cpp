@@ -46,17 +46,12 @@ void autonomous() {
 	descore.retract();
 	switch (current_auto) {
 		case Autos::Left:
-			chassis.setPose(0, 0, 0, false);
-			matchload.extend();
-			chassis.moveToPose(6, 31, 270, 5000, {}, false);
-			intake_float.move(127);
-			intake_half.move(63);
+			//chassis.setPose(0, 0, 0, false);
+			//matchload.extend();
+			//chassis.moveToPose(-24, 0, 0, 5000, {}, false);
+			//intake_float.move(-127);
+			//intake_half.move(-127);
 			pros::delay(500);
-			chassis.moveToPose(34, 31, 270, 5000, { .forwards = false }, false);
-			intake_float.move(127);
-			intake_half.move(127);
-			indexer.move(127);
-			descore.extend();
 			break;
 		case Autos::Right:
 			chassis.setPose(0, 0, 90, false);
@@ -109,8 +104,49 @@ void autonomous() {
 		case Autos::Skills:
 			break;
 		case Autos::None:
-			chassis.setPose(0, 0, 0, false);
-			chassis.moveToPoint(0, 8, 5000, {}, false);
+		
+			//auto matches left
+			
+			//chassis.setPose(0, 0, 0, false);
+			/*descore.toggle();
+			all.move(127);
+			pros::delay(300);
+			all.move(60);
+			pros::delay(100);
+					
+			all.move(-127);200823
+			pros::delay(10);
+			all.move(0);
+			pros::delay(1000);
+			//chassis.turnToHeading(270, 1000, {.direction = AngularDirection::CCW_COUNTERCLOCKWISE,}, false);
+			right.move(127);
+			left.move(-127);
+			pros::delay(270);
+			right.move(0);
+			left.move(0);
+			pros::delay(1000);
+			all.move(127);
+			pros::delay(600);
+			intake_float.move(127);
+			all.move(80);
+			pros::delay(2000);
+			all.move(-127);
+			pros::delay(400);
+			all.move(0);
+			descore.toggle();*/
+			/*matchload.toggle();
+			all.move(127);
+			pros::delay(1200);
+			all.move(0);*/
+			//chassis.turnToHeading(270, 1000, {.direction = AngularDirection::CCW_COUNTERCLOCKWISE,}, false);
+			/*descore.toggle();
+			matchload.toggle();
+			intake_float.move(-127);
+			chassis.moveToPoint(-20, 48, 5000, {.maxSpeed=60}, false);
+			chassis.turnToHeading(270, 1000, {.direction = AngularDirection::CCW_COUNTERCLOCKWISE,}, false);
+			chassis.moveToPoint(-20, 0, 5000, {.maxSpeed=60}, false);
+			intake_float.move(-127);
+			//chassis.moveToPoint(-24, 28, 3000, {.maxSpeed=40}, false);*/
 			break;
 	}
 }

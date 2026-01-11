@@ -3,8 +3,9 @@
 #include "main.h"
 #include "lemlib/api.hpp"
 
-pros::MotorGroup left({-10, 9, -8}, pros::MotorGearset::blue);
-pros::MotorGroup right({1, -2, 3}, pros::MotorGearset::blue);
+pros::MotorGroup left({-1, 2, -3}, pros::MotorGearset::blue);
+pros::MotorGroup right({10, -9, 8}, pros::MotorGearset::blue);
+pros::MotorGroup all({10, -9, 8, -1, 2, -3}, pros::MotorGearset::blue);
 
 lemlib::Drivetrain drivetrain(
     &left, &right, 10.372,
@@ -46,7 +47,7 @@ lemlib::Chassis chassis(
 
 pros::Controller cont(pros::E_CONTROLLER_MASTER);
 
-pros::Motor intake_float(4, pros::MotorGearset::blue);
+pros::Motor intake_float(-4, pros::MotorGearset::blue);
 pros::Motor intake_half(5, pros::MotorGearset::green);
 pros::Motor indexer(6, pros::MotorGearset::green);
 

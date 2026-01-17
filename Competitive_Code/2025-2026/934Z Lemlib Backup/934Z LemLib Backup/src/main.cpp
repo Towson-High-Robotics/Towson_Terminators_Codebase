@@ -1,6 +1,8 @@
 #include "lemlib/api.hpp"
 #include "main.h"
+#include "lemlib/chassis/chassis.hpp"
 #include "main.hpp"
+#include "pros/rtos.hpp"
 
 const inline uint32_t HORIZONTAL_RES = 480;
 const inline uint32_t VERTICAL_RES = 240;
@@ -13,140 +15,71 @@ enum Autos {
 	None
 };
 
-Autos current_auto = Autos::None;
+Autos current_auto = Autos::Left;
 
 void render_loop() {
 	while(true) {
 		pros::screen::erase();
 		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 4, std::format("LF: {:.0}°C {:.0}°", left.get_temperature(0), left.get_position(0)).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 20, std::format("LM: {:.0}°C {:.0}°", left.get_temperature(1), left.get_position(1)).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 36, std::format("LB: {:.0}°C {:.0}°", left.get_temperature(2), left.get_position(2)).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 52, std::format("RF: {:.0}°C {:.0}°", right.get_temperature(0), right.get_position(0)).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 68, std::format("RM: {:.0}°C {:.0}°", right.get_temperature(1), right.get_position(1)).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 84, std::format("RB: {:.0}°C {:.0}°", right.get_temperature(2), right.get_position(2)).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 76, std::format("IF: {:.0}°C {:.0}°", intake_float.get_temperature(), intake_float.get_position()).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 88, std::format("IT: {:.0}°C {:.0}°", intake_float.get_temperature(), intake_half.get_position()).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 100, std::format("IB: {:.0}°C {:.0}°", indexer.get_temperature(), indexer.get_position()).c_str());
-		pros::delay(250);
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 22, std::format("LM: {:.0}°C {:.0}°", left.get_temperature(1), left.get_position(1)).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 40, std::format("LB: {:.0}°C {:.0}°", left.get_temperature(2), left.get_position(2)).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 58, std::format("RF: {:.0}°C {:.0}°", right.get_temperature(0), right.get_position(0)).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 76, std::format("RM: {:.0}°C {:.0}°", right.get_temperature(1), right.get_position(1)).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 94, std::format("RB: {:.0}°C {:.0}°", right.get_temperature(2), right.get_position(2)).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 88, std::format("IF: {:.0}°C {:.0}°", intake_float.get_temperature(), intake_float.get_position()).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 102, std::format("IT: {:.0}°C {:.0}°", intake_float.get_temperature(), intake_half.get_position()).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 116, std::format("IB: {:.0}°C {:.0}°", indexer.get_temperature(), indexer.get_position()).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 128, std::format("x: {}°", chassis.getPose().x).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 142, std::format("y: {}°", chassis.getPose().y).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 156, std::format("theta: {}°", chassis.getPose().theta).c_str());
+		pros::delay(500);
 	}
 }
 
 void initialize() {
 	pros::screen::erase();
 	chassis.calibrate();
+	pros::delay(3000);
 	pros::Task([&]{ render_loop(); });
 }
 
 void disabled() {}
 
-void competition_initialize() {}
+void competition_initialize() {
+	chassis.calibrate();
+	pros::delay(3000);
+}
+
+void move_intake(int32_t volts) {
+	intake_half.move(volts);
+	intake_float.move(volts);
+}
 
 void autonomous() {
 	matchload.retract();
 	descore.retract();
 	switch (current_auto) {
 		case Autos::Left:
-			//chassis.setPose(0, 0, 0, false);
-			//matchload.extend();
-			//chassis.moveToPose(-24, 0, 0, 5000, {}, false);
-			//intake_float.move(-127);
-			//intake_half.move(-127);
-			pros::delay(500);
+			chassis.setPose(0, 0, 0, false);
+			chassis.moveToPose(-10, 30, 250, 3500);
+			chassis.waitUntilDone();
+			matchload.extend();
+			move_intake(127);
+			chassis.moveToPose(-36, 10, 290, 5000);
+			chassis.waitUntilDone();
+			pros::delay(100);
+			chassis.moveToPose(24, 10, 290, 5000);
+			chassis.waitUntilDone();
+			descore.extend();
 			break;
 		case Autos::Right:
-			chassis.setPose(0, 0, 90, false);
-			chassis.moveToPose(7, 30.261, 45, 5000, {}, false);
-			chassis.moveToPose(1.5, 36.5, 45, 5000, {}, false);
-			intake_float.move(-127);
-			pros::delay(250);
-			intake_float.move(0);
-			chassis.moveToPose(39, -1, 225, 5000, { .forwards = false }, false);
-			matchload.extend();
-			chassis.moveToPose(39, -10, 270, 5000, {}, false);
-			intake_float.move(127);
-			intake_half.move(127);
-			pros::delay(500);
-			chassis.moveToPose(39, 18, 270, 5000, { .forwards = false }, false);
-			indexer.move(127);
-			descore.extend();
 			break;
 		case Autos::Solo:
-			chassis.setPose(0, 0, 90, false);
-			chassis.moveToPose(7, 30.261, 45, 5000, {}, false);
-			chassis.moveToPose(1.5, 36.5, 45, 5000, {}, false);
-			intake_float.move(-127);
-			pros::delay(250);
-			intake_float.move(0);
-			chassis.moveToPose(39, -1, 225, 5000, { .forwards = false }, false);
-			matchload.extend();
-			chassis.moveToPose(39, -10, 270, 5000, {}, false);
-			intake_float.move(127);
-			intake_half.move(127);
-			pros::delay(500);
-			chassis.moveToPose(39, 18, 270, 5000, { .forwards = false }, false);
-			indexer.move(127);
-			descore.extend();
-			pros::delay(2000);
-			descore.retract(); matchload.retract();
-			intake_float.move(0); intake_half.move(0);
-			indexer.move(0);
-			chassis.moveToPose(28, 10, 0, 5000, {}, false);
-			chassis.moveToPose(-55, 10, 270, 5000, {}, false);
-			matchload.extend();
-			chassis.moveToPose(-55, -10, 270, 5000, {}, false);
-			intake_float.move(127);
-			intake_half.move(127);
-			pros::delay(500);
-			chassis.moveToPose(-55, 18, 270, 5000, { .forwards = false }, false);
-			indexer.move(127);
-			descore.extend();
 			break;
 		case Autos::Skills:
 			break;
 		case Autos::None:
-		
-			//auto matches left
-			
-			//chassis.setPose(0, 0, 0, false);
-			/*descore.toggle();
-			all.move(127);
-			pros::delay(300);
-			all.move(60);
-			pros::delay(100);
-					
-			all.move(-127);200823
-			pros::delay(10);
-			all.move(0);
-			pros::delay(1000);
-			//chassis.turnToHeading(270, 1000, {.direction = AngularDirection::CCW_COUNTERCLOCKWISE,}, false);
-			right.move(127);
-			left.move(-127);
-			pros::delay(270);
-			right.move(0);
-			left.move(0);
-			pros::delay(1000);
-			all.move(127);
-			pros::delay(600);
-			intake_float.move(127);
-			all.move(80);
-			pros::delay(2000);
-			all.move(-127);
-			pros::delay(400);
-			all.move(0);
-			descore.toggle();*/
-			/*matchload.toggle();
-			all.move(127);
-			pros::delay(1200);
-			all.move(0);*/
-			//chassis.turnToHeading(270, 1000, {.direction = AngularDirection::CCW_COUNTERCLOCKWISE,}, false);
-			/*descore.toggle();
-			matchload.toggle();
-			intake_float.move(-127);
-			chassis.moveToPoint(-20, 48, 5000, {.maxSpeed=60}, false);
-			chassis.turnToHeading(270, 1000, {.direction = AngularDirection::CCW_COUNTERCLOCKWISE,}, false);
-			chassis.moveToPoint(-20, 0, 5000, {.maxSpeed=60}, false);
-			intake_float.move(-127);
-			//chassis.moveToPoint(-24, 28, 3000, {.maxSpeed=40}, false);*/
+			chassis.moveToPoint(0, 24, 5000);
 			break;
 	}
 }

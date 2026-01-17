@@ -5,7 +5,6 @@
 
 pros::MotorGroup left({-1, 2, -3}, pros::MotorGearset::blue);
 pros::MotorGroup right({10, -9, 8}, pros::MotorGearset::blue);
-pros::MotorGroup all({10, -9, 8, -1, 2, -3}, pros::MotorGearset::blue);
 
 lemlib::Drivetrain drivetrain(
     &left, &right, 10.372,
@@ -19,14 +18,14 @@ lemlib::OdomSensors sensors(
 );
 
 lemlib::ControllerSettings lateral(
-    90, 0.125, 35, 5,
-    1, 100, 5, 500,
-    20
+    6, 0, 10, 5,
+    1, 100, 2, 500,
+    127
 );
 
 lemlib::ControllerSettings angular(
-    60, 0.125, 20, 2,
-    0.5, 100, 2, 500,
+    4, 0, 15, 0,
+    0, 0, 0, 0,
     0
 );
 
@@ -52,4 +51,4 @@ pros::Motor intake_half(5, pros::MotorGearset::green);
 pros::Motor indexer(6, pros::MotorGearset::green);
 
 pros::adi::Pneumatics matchload('A', false, false);
-pros::adi::Pneumatics descore('B', false, true);
+pros::adi::Pneumatics descore('B', false, false);

@@ -3,21 +3,51 @@
 #include "lemlib/chassis/chassis.hpp"
 #include "main.hpp"
 #include "pros/rtos.hpp"
+#include "pros/screen.h"
+#include "pros/screen.hpp"
 
 const inline uint32_t HORIZONTAL_RES = 480;
 const inline uint32_t VERTICAL_RES = 240;
 
 enum Autos {
-	Left,
-	Right,
-	Solo,
-	Skills,
-	None
+	None = 0,
+	Left = 1,
+	Right = 2,
+	Solo = 4,
+	Skills = 3,
 };
 
-Autos current_auto = Autos::Left;
+std::string autos_as_string(Autos v) {
+	switch (v) {
+        case None: return "None - Default";
+        case Left: return "Left";
+        case Right: return "Right";
+        case Solo: return "SoloAWP";
+        case Skills: return "Skills";
+		default: return "";
+    }
+}
+
+Autos next_auto(Autos v) {
+	switch (v) {
+        case None: return Autos::Left;
+        case Left: return Autos::Right;
+        case Right: return Autos::Solo;
+        case Solo: return Autos::Skills;
+        case Skills: return Autos::None;
+    }
+}
+
+Autos current_auto = Autos::Skills;
+
+void touch_event_cb() {
+	current_auto = next_auto(current_auto);
+}
 
 void render_loop() {
+
+	pros::screen::touch_callback(touch_event_cb, pros::last_touch_e_t::E_TOUCH_PRESSED);
+
 	while(true) {
 		pros::screen::erase();
 		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 4, std::format("LF: {:.0}°C {:.0}°", left.get_temperature(0), left.get_position(0)).c_str());
@@ -26,12 +56,13 @@ void render_loop() {
 		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 58, std::format("RF: {:.0}°C {:.0}°", right.get_temperature(0), right.get_position(0)).c_str());
 		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 76, std::format("RM: {:.0}°C {:.0}°", right.get_temperature(1), right.get_position(1)).c_str());
 		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 94, std::format("RB: {:.0}°C {:.0}°", right.get_temperature(2), right.get_position(2)).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 88, std::format("IF: {:.0}°C {:.0}°", intake_float.get_temperature(), intake_float.get_position()).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 102, std::format("IT: {:.0}°C {:.0}°", intake_float.get_temperature(), intake_half.get_position()).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 116, std::format("IB: {:.0}°C {:.0}°", indexer.get_temperature(), indexer.get_position()).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 128, std::format("x: {}°", chassis.getPose().x).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 142, std::format("y: {}°", chassis.getPose().y).c_str());
-		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 156, std::format("theta: {}°", chassis.getPose().theta).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 112, std::format("IF: {:.0}°C {:.0}°", intake_float.get_temperature(), intake_float.get_position()).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 130, std::format("IT: {:.0}°C {:.0}°", intake_float.get_temperature(), intake_half.get_position()).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 148, std::format("IB: {:.0}°C {:.0}°", indexer.get_temperature(), indexer.get_position()).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 166, std::format("pos: x: {} in, y: {} in", chassis.getPose().x, chassis.getPose().y).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 184, std::format("theta: {}°", chassis.getPose().theta).c_str());
+		pros::screen::print(pros::text_format_e_t::E_TEXT_MEDIUM, 4, 202, std::format("auto: {}", autos_as_string(current_auto)).c_str());
+
 		pros::delay(500);
 	}
 }
@@ -39,14 +70,14 @@ void render_loop() {
 void initialize() {
 	pros::screen::erase();
 	chassis.calibrate();
-	pros::delay(3000);
+	//pros::delay(3000);
 	pros::Task([&]{ render_loop(); });
 }
 
 void disabled() {}
 
 void competition_initialize() {
-	chassis.calibrate();
+	//chassis.calibrate();
 	pros::delay(3000);
 }
 
@@ -60,26 +91,116 @@ void autonomous() {
 	descore.retract();
 	switch (current_auto) {
 		case Autos::Left:
+			chassis.cancelAllMotions();
 			chassis.setPose(0, 0, 0, false);
-			chassis.moveToPose(-10, 30, 250, 3500);
+			chassis.moveToPose(0, 30, 270, 3500, {.minSpeed = 50});
 			chassis.waitUntilDone();
 			matchload.extend();
 			move_intake(127);
-			chassis.moveToPose(-36, 10, 290, 5000);
+			indexer.move(127);
+			chassis.moveToPose(-25.5, 24, 270, 3000);
 			chassis.waitUntilDone();
-			pros::delay(100);
-			chassis.moveToPose(24, 10, 290, 5000);
+			chassis.moveToPose(32, 24, 270, 2000, {.forwards = false});
 			chassis.waitUntilDone();
 			descore.extend();
+			//chassis.swingToHeading(90, DriveSide::LEFT, 3000);
+			//chassis.waitUntilDone();
+			//descore.retract();
+			//chassis.moveToPose(40, 28, 90, 5000);
+			//chassis.waitUntilDone();
 			break;
 		case Autos::Right:
+			chassis.cancelAllMotions();
+			chassis.setPose(0, 0, 0, false);
+			chassis.moveToPose(0, 28, 90, 3500, {.minSpeed = 50});
+			chassis.waitUntilDone();
+			matchload.extend();
+			move_intake(127);
+			indexer.move(127);
+			chassis.moveToPose(25.5, 26, 90, 2750);
+			chassis.waitUntilDone();
+			move_intake(127);
+			chassis.moveToPose(-32, 26, 90, 1750, {.forwards = false});
+			chassis.waitUntilDone();
+			descore.extend();
+			pros::delay(2000);
+			matchload.retract();
+			//chassis.moveToPoint(0, 26, 1000);
+			//chassis.waitUntilDone();
+			descore.retract();
+			chassis.moveToPose(-20, 26, 90, 1000);
+			chassis.moveToPose(-18, 18, 225, 3000);
+			chassis.moveToPose(-14, 14, 225, 1000);
+			chassis.waitUntilDone();
+			matchload.extend();
+			chassis.moveToPose(-23, 5, 225, 3000);
+			chassis.waitUntilDone();
+			matchload.retract();
+			chassis.moveToPose(-31, -8, 225, 1000);
+			move_intake(-127);
+			indexer.move(-127);
+			//chassis.moveToPose(-40, 0, 135, 3000);
+			//chassis.moveToPoint(-32, 27, 1000, {.forwards = false, .minSpeed = 100});
+			//chassis.swingToHeading(90, DriveSide::RIGHT, 3000);
+			//chassis.waitUntilDone();
+			//descore.retract();
+			//chassis.moveToPose(-40, 28, 90, 5000);
+			//chassis.waitUntilDone();
 			break;
 		case Autos::Solo:
 			break;
 		case Autos::Skills:
+			chassis.cancelAllMotions();
+			chassis.setPose(0, 0, 0, false);
+			chassis.moveToPose(0, 28, 90, 3500, {.minSpeed = 50});
+			chassis.waitUntilDone();
+			matchload.extend();
+			move_intake(127);
+			indexer.move(127);
+			chassis.moveToPose(25, 27, 90, 2750);
+			chassis.waitUntilDone();
+			move_intake(127);
+			//pros::delay(100);
+			//chassis.moveToPose(25.25, 27, 90, 50);
+			//chassis.waitUntilDone();
+			//chassis.moveToPose(25, 27, 90, 50);
+			chassis.moveToPose(-35, 27, 90, 1750, {.forwards = false});
+			chassis.waitUntilDone();
+			descore.extend();
+			matchload.retract();
+			pros::delay(2000);
+			//chassis.swingToHeading(90, DriveSide::LEFT, 3000);
+			//chassis.waitUntilDone();
+			//chassis.moveToPose(-30, 28, 270, 5000);
+			//descore.retract();
+			//chassis.waitUntilDone();
+			//chassis.moveToPose(18, -12, 180, 5000, {.minSpeed = 100});
+			chassis.moveToPose(-20, 27, 90, 1500);
+			chassis.moveToPose(-25, 24, 90, 1500, {.forwards = false});
+			chassis.waitUntil(3);
+			descore.retract();
+			//chassis.turnToHeading(180, 1000);
+			//chassis.moveToPose(-24, 24, 270, 2500);
 			break;
 		case Autos::None:
-			chassis.moveToPoint(0, 24, 5000);
+			//chassis.moveToPoint(0, 48, 5000, {.minSpeed = 127});
+			left.move(127);
+			right.move(127);
+			move_intake(127);
+			indexer.move(127);
+			descore.extend();
+			pros::delay(4000);
+			left.move(50);
+			right.move(-50);
+			pros::delay(250);
+			left.move(-50);
+			right.move(50);
+			pros::delay(250);
+			left.move(50);
+			right.move(-50);
+			pros::delay(250);
+			left.move(127);
+			right.move(127);
 			break;
 	}
 }
@@ -87,9 +208,9 @@ void autonomous() {
 void opcontrol() {
 	while(true) {
 		int leftY = cont.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-		int rightY = cont.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
+		int rightX = cont.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
-		chassis.tank(leftY, rightY);
+		chassis.arcade(leftY, rightX);
 
 		if(cont.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
 			intake_float.move(127); intake_half.move(127);
@@ -98,6 +219,7 @@ void opcontrol() {
 		} else {
 			intake_float.move(0); intake_half.move(0);
 		}
+		// Continue for the rest of the motors..
 
 		if(cont.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
 			indexer.move(127);
@@ -110,6 +232,7 @@ void opcontrol() {
 		if(cont.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
 			matchload.toggle();
 		}
+		// And continue for the other pistons
 
 		if(cont.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
 			descore.toggle();

@@ -51,7 +51,7 @@ pros::Controller cont(pros::E_CONTROLLER_MASTER);
 // Intake & Storage
 pros::Motor intake_float(-4, pros::MotorGearset::blue);
 pros::Motor intake_half(5, pros::MotorGearset::green);
-pros::Motor indexer(6, pros::MotorGearset::green);
+pros::Motor indexer(-6, pros::MotorGearset::green);
 // Pistons
 pros::adi::Pneumatics matchload('A', false, false);
-pros::adi::Pneumatics descore('B', false, false);
+pros::adi::Pneumatics descore('B', true, false);

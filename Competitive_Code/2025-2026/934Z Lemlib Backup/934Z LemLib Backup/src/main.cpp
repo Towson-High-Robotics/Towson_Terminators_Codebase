@@ -38,7 +38,7 @@ Autos next_auto(Autos v) {
     }
 }
 
-Autos current_auto = Autos::Skills;
+Autos current_auto = Autos::Left;
 
 void touch_event_cb() {
 	current_auto = next_auto(current_auto);
@@ -86,124 +86,7 @@ void move_intake(int32_t volts) {
 	intake_float.move(volts);
 }
 
-void autonomous() {
-	matchload.retract();
-	descore.retract();
-	switch (current_auto) {
-		case Autos::Left:
-			chassis.cancelAllMotions();
-			chassis.setPose(0, 0, 0, false);
-			chassis.moveToPose(0, 30, 270, 3500, {.minSpeed = 50});
-			chassis.waitUntilDone();
-			matchload.extend();
-			move_intake(127);
-			indexer.move(127);
-			chassis.moveToPose(-25.5, 24, 270, 3000);
-			chassis.waitUntilDone();
-			chassis.moveToPose(32, 24, 270, 2000, {.forwards = false});
-			chassis.waitUntilDone();
-			descore.extend();
-			//chassis.swingToHeading(90, DriveSide::LEFT, 3000);
-			//chassis.waitUntilDone();
-			//descore.retract();
-			//chassis.moveToPose(40, 28, 90, 5000);
-			//chassis.waitUntilDone();
-			break;
-		case Autos::Right:
-			chassis.cancelAllMotions();
-			chassis.setPose(0, 0, 0, false);
-			chassis.moveToPose(0, 28, 90, 3500, {.minSpeed = 50});
-			chassis.waitUntilDone();
-			matchload.extend();
-			move_intake(127);
-			indexer.move(127);
-			chassis.moveToPose(25.5, 26, 90, 2750);
-			chassis.waitUntilDone();
-			move_intake(127);
-			chassis.moveToPose(-32, 26, 90, 1750, {.forwards = false});
-			chassis.waitUntilDone();
-			descore.extend();
-			pros::delay(2000);
-			matchload.retract();
-			//chassis.moveToPoint(0, 26, 1000);
-			//chassis.waitUntilDone();
-			descore.retract();
-			chassis.moveToPose(-20, 26, 90, 1000);
-			chassis.moveToPose(-18, 18, 225, 3000);
-			chassis.moveToPose(-14, 14, 225, 1000);
-			chassis.waitUntilDone();
-			matchload.extend();
-			chassis.moveToPose(-23, 5, 225, 3000);
-			chassis.waitUntilDone();
-			matchload.retract();
-			chassis.moveToPose(-31, -8, 225, 1000);
-			move_intake(-127);
-			indexer.move(-127);
-			//chassis.moveToPose(-40, 0, 135, 3000);
-			//chassis.moveToPoint(-32, 27, 1000, {.forwards = false, .minSpeed = 100});
-			//chassis.swingToHeading(90, DriveSide::RIGHT, 3000);
-			//chassis.waitUntilDone();
-			//descore.retract();
-			//chassis.moveToPose(-40, 28, 90, 5000);
-			//chassis.waitUntilDone();
-			break;
-		case Autos::Solo:
-			break;
-		case Autos::Skills:
-			chassis.cancelAllMotions();
-			chassis.setPose(0, 0, 0, false);
-			chassis.moveToPose(0, 28, 90, 3500, {.minSpeed = 50});
-			chassis.waitUntilDone();
-			matchload.extend();
-			move_intake(127);
-			indexer.move(127);
-			chassis.moveToPose(25, 27, 90, 2750);
-			chassis.waitUntilDone();
-			move_intake(127);
-			//pros::delay(100);
-			//chassis.moveToPose(25.25, 27, 90, 50);
-			//chassis.waitUntilDone();
-			//chassis.moveToPose(25, 27, 90, 50);
-			chassis.moveToPose(-35, 27, 90, 1750, {.forwards = false});
-			chassis.waitUntilDone();
-			descore.extend();
-			matchload.retract();
-			pros::delay(2000);
-			//chassis.swingToHeading(90, DriveSide::LEFT, 3000);
-			//chassis.waitUntilDone();
-			//chassis.moveToPose(-30, 28, 270, 5000);
-			//descore.retract();
-			//chassis.waitUntilDone();
-			//chassis.moveToPose(18, -12, 180, 5000, {.minSpeed = 100});
-			chassis.moveToPose(-20, 27, 90, 1500);
-			chassis.moveToPose(-25, 24, 90, 1500, {.forwards = false});
-			chassis.waitUntil(3);
-			descore.retract();
-			//chassis.turnToHeading(180, 1000);
-			//chassis.moveToPose(-24, 24, 270, 2500);
-			break;
-		case Autos::None:
-			//chassis.moveToPoint(0, 48, 5000, {.minSpeed = 127});
-			left.move(127);
-			right.move(127);
-			move_intake(127);
-			indexer.move(127);
-			descore.extend();
-			pros::delay(4000);
-			left.move(50);
-			right.move(-50);
-			pros::delay(250);
-			left.move(-50);
-			right.move(50);
-			pros::delay(250);
-			left.move(50);
-			right.move(-50);
-			pros::delay(250);
-			left.move(127);
-			right.move(127);
-			break;
-	}
-}
+
 
 void opcontrol() {
 	while(true) {

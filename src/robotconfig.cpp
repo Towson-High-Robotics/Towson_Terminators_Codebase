@@ -22,7 +22,7 @@ pros::MotorGroup right_motor_group(
 
 // Lift
 pros::MotorGroup D4rb(
-    {11, -20},
+    {11, -18},
     pros::MotorGears::red
 );
 
@@ -53,7 +53,7 @@ pros::adi::DigitalOut claw('A');
 lemlib::Drivetrain drivetrain(
     &left_motor_group,
     &right_motor_group,
-    11,
+    11.5,
     lemlib::Omniwheel::NEW_325,
     360,
     2
@@ -66,7 +66,7 @@ lemlib::Drivetrain drivetrain(
 // ======================
 
 
-pros::Imu imu(15);
+pros::Imu imu(13);
 
 
 //pros::Rotation horizontal_encoder(16);
@@ -116,15 +116,15 @@ lemlib::OdomSensors sensors(
 
 
 lemlib::ControllerSettings lateral_controller(
-    10,
-    0,
-    3,
-    0,
-    0,
-    0,
-    0,
-    0,
-    20
+   10,  // kP
+    0,   // kI
+    3,   // kD
+    3,   // anti-windup
+    1,   // small error range
+    100, // small error timeout
+    3,   // large error range
+    500, // large error timeout
+    20   // slew rate
 );
 
 
@@ -173,35 +173,23 @@ clawrot.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 
 intake.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 
-
+    claw.set_value(true);
     chassis.calibrate();
 
 
     pros::Task screen_task([] {
+    while (true) {
 
-        while(true) {
+        pros::lcd::print(0, "X: %.2f", chassis.getPose().x);
+pros::lcd::print(1, "Y: %.2f", chassis.getPose().y);
+pros::lcd::print(2, "Theta: %.2f", chassis.getPose().theta);
 
-            pros::lcd::print(
-                0,
-                "X: %.2f",
-                chassis.getPose().x
-            );
+        pros::delay(100);
 
-            pros::lcd::print(
-                1,
-                "Y: %.2f",
-                chassis.getPose().y
-            );
+    }
+});
 
-            pros::lcd::print(
-                2,
-                "Theta: %.2f",
-                chassis.getPose().theta
-            );
+};
 
 
-            pros::delay(50);
-        }
-
-    });
-}
+    

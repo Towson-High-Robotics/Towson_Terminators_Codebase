@@ -1,0 +1,340 @@
+/*#include "main.h"
+#include "lemlib/api.hpp"
+
+extern lemlib::Chassis chassis;
+
+extern pros::MotorGroup D4rb;
+extern pros::Motor intake;
+extern pros::Motor clawrot;
+extern pros::adi::DigitalOut claw;
+
+// ======================
+// AUTONOMOUS SETTINGS
+// ======================
+
+// Change these distances to match your robot's path.
+// Blue is mirrored across the X axis.
+
+
+
+
+
+
+
+// ======================
+// DRIVER CONTROL
+// ======================
+
+void on_center_button() {
+
+    static bool pressed = false;
+    pressed = !pressed;
+
+    if (pressed) {
+        pros::lcd::set_text(2, "I was pressed!");
+    }
+    else {
+        pros::lcd::clear_line(2);
+    }
+}
+
+
+void disabled() {}
+
+void competition_initialize() {}
+
+
+// ======================
+// AUTONOMOUS
+// ======================
+
+
+// ==========================================
+// RED AUTON 1
+// ==========================================
+
+
+//this one drive forwards to the pin (0,12)
+//collect pin (lower, lift and do all that stuff)
+//turn right and place pin at scoring area (12,24)
+void redAuton1() {
+
+
+
+    chassis.setPose(0, 0, 0);
+
+    chassis.moveToPoint(0, 12, 3000);
+
+    D4rb.move(-127);
+    pros::delay(500);
+    D4rb.move(0);
+
+    intake.move(127);
+    pros::delay(1000);
+    intake.move(0);
+
+    D4rb.move(127);
+    pros::delay(800);
+    D4rb.move(0);
+
+    clawrot.move(90);
+    pros::delay(500);
+    clawrot.move(0);
+
+    claw.set_value(false);
+    pros::delay(300);
+
+    chassis.moveToPoint(0, 24, 3000);
+
+    chassis.turnToHeading(90, 2000);
+
+    chassis.moveToPoint(12, 24, 3000);
+}
+
+
+// ==========================================
+// RED AUTON 2
+// ==========================================
+
+//drive right across the bottom (12,0 )
+// collect pin 
+// drive left and place pin at scoring area
+void redAuton2() {
+
+    chassis.setPose(0, 0, 0);
+
+    // Approach pin from alternate direction
+    chassis.moveToPoint(12, 0, 3000);
+
+    chassis.turnToHeading(0, 2000);
+
+    // Lower lift
+    D4rb.move(-127);
+    pros::delay(500);
+    D4rb.move(0);
+
+    // Collect pin
+    intake.move(127);
+    pros::delay(1200);
+    intake.move(0);
+
+    // Raise lift
+    D4rb.move(127);
+    pros::delay(800);
+    D4rb.move(0);
+
+    // Rotate claw
+    clawrot.move(90);
+    pros::delay(500);
+    clawrot.move(0);
+
+    claw.set_value(false);
+    pros::delay(300);
+
+    // Move toward placement
+    chassis.moveToPoint(12, 18, 3000);
+
+    chassis.turnToHeading(180, 2000);
+
+    chassis.moveToPoint(0, 18, 3000);
+}
+
+
+// ==========================================
+// BLUE AUTON 1
+// ==========================================
+
+
+//drive forward to the pin (0,12)
+// collect pin 
+// turn lefrt and place pin at sc
+void blueAuton1() { 
+
+    chassis.setPose(0, 0, 0);
+
+    chassis.moveToPoint(0, 12, 3000);
+
+    D4rb.move(-127);
+    pros::delay(500);
+    D4rb.move(0);
+
+    intake.move(127);
+    pros::delay(1000);
+    intake.move(0);
+
+    D4rb.move(127);
+    pros::delay(800);
+    D4rb.move(0);
+
+    clawrot.move(90);
+    pros::delay(500);
+    clawrot.move(0);
+
+    claw.set_value(false);
+    pros::delay(300);
+
+    chassis.moveToPoint(0, 24, 3000);
+
+    chassis.turnToHeading(270, 2000);
+
+    chassis.moveToPoint(-12, 24, 3000);
+}
+
+
+// ==========================================
+// BLUE AUTON 2
+// ==========================================
+
+void blueAuton2() {
+
+    chassis.setPose(0, 0, 0);
+
+    // Alternate approach
+    chassis.moveToPoint(-12, 0, 3000);
+
+    chassis.turnToHeading(0, 2000);
+
+    // Lower lift
+    D4rb.move(-127);
+    pros::delay(500);
+    D4rb.move(0);
+
+    // Collect pin
+    intake.move(127);
+    pros::delay(1200);
+    intake.move(0);
+
+    // Raise lift
+    D4rb.move(127);
+    pros::delay(800);
+    D4rb.move(0);
+
+    // Rotate claw
+    clawrot.move(90);
+    pros::delay(500);
+    clawrot.move(0);
+
+    claw.set_value(false);
+    pros::delay(300);
+
+    // Move toward placement
+    chassis.moveToPoint(-12, 18, 3000);
+
+    chassis.turnToHeading(180, 2000);
+
+    chassis.moveToPoint(0, 18, 3000);
+}
+
+
+// ==========================================
+// AUTONOMOUS SELECTION
+// ==========================================
+
+void autonomous() {
+
+    // Choose ONE routine:
+
+    redAuton1();
+
+    // redAuton2();
+    // blueAuton1();
+    // blueAuton2();
+}
+
+
+
+
+// ======================
+// DRIVER CONTROL
+// ======================
+
+void opcontrol() {
+
+    pros::Controller master(pros::E_CONTROLLER_MASTER);
+
+    bool clawState = true;
+    bool clawLastState = false;
+
+    while (true) {
+
+        // ======================
+        // DRIVING
+        // ======================
+
+        int forward = master.get_analog(
+            pros::E_CONTROLLER_ANALOG_LEFT_Y
+        );
+
+        int turn = master.get_analog(
+            pros::E_CONTROLLER_ANALOG_RIGHT_X
+        );
+
+        chassis.arcade(forward, turn);
+
+
+        // ======================
+        // INTAKE
+        // ======================
+
+        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+            intake.move(127);
+        }
+        else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+            intake.move(-127);
+        }
+        else {
+            intake.move(0);
+        }
+
+
+        // ======================
+        // LIFT
+        // ======================
+
+        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+            D4rb.move(127);
+        }
+        else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+            D4rb.move(-127);
+        }
+        else {
+            D4rb.move(0);
+        }
+
+
+        // ======================
+        // CLAW ROTATION
+        // ======================
+
+        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+            clawrot.move(90);
+        }
+        else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+            clawrot.move(-90);
+        }
+        else {
+            clawrot.move(0);
+        }
+
+
+        // ======================
+        // CLAW TOGGLE
+        // ======================
+
+        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_A)
+            && !clawLastState) {
+
+            clawState = !clawState;
+            clawLastState = true;
+        }
+
+        if (!master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+            clawLastState = false;
+        }
+
+        claw.set_value(clawState);
+
+        pros::delay(20);
+    }
+}
+*/
